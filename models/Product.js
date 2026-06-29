@@ -8,7 +8,9 @@ const productSchema = new mongoose.Schema({
   images: [{ type: String }],
   description: { type: String, required: true },
   sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['available', 'sold', 'rejected', 'pending'], default: 'available' }
+  status: { type: String, enum: ['available', 'sold', 'rejected', 'pending'], default: 'pending' },
+  views: { type: Number, default: 0 },
+  reportCount: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

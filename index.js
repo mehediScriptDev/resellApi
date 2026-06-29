@@ -8,6 +8,9 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const userRoutes = require('./routes/userRoutes');
+const statsRoutes = require('./routes/statsRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
 
@@ -21,6 +24,9 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

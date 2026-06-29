@@ -1,15 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const {
+  getMe,
+  updateMe,
+  getAllUsers,
+  updateUserStatus,
+  deleteUser,
+} = require('../controllers/userController');
 const { verifyToken, verifyRole } = require('../middleware/auth');
 
-router.get('/', verifyToken, verifyRole('admin'), async (req, res) => {
-  try {
-    const users = await User.find({}).select('-password');
-    res.json({ success: true, data: users });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+router.get('/me', verifyToken, getMe);
+router.put('/me', verifyToken, updateMe);
+router.get('/', verifyToken, verifyRole('admin'), getAllUsers);
+router.put('/:id/status', verifyToken, verifyRole('admin'), updateUserStatus);
+router.delete('/:id', verifyToken, verifyRole('admin'), deleteUser);
 
 module.exports = router;

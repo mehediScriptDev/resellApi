@@ -13,7 +13,10 @@ const verifyToken = async (req, res, next) => {
       if (!req.user) {
          return res.status(401).json({ success: false, message: 'User not found' });
       }
-      next();
+      if (req.user.status === 'blocked') {
+        return res.status(403).json({ success: false, message: 'Account is blocked' });
+      }
+      return next();
     } catch (error) {
       console.error(error);
       res.status(401).json({ success: false, message: 'Not authorized, token failed' });
