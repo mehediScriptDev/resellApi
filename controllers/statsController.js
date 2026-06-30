@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Payment = require('../models/Payment');
+const { DEFAULT_CATEGORIES } = require('../constants/categories');
 
 exports.getPublicStats = async (req, res) => {
   try {
@@ -27,13 +28,23 @@ exports.getCategoryStats = async (req, res) => {
       { $match: { status: 'available' } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
-      { $limit: 10 },
     ]);
 
-    res.json({
-      success: true,
-      data: categories.map((c) => ({ name: c._id, count: c.count })),
-    });
+    const countMap = Object.fromEntries(
+      categories.filter((c) => c._id).map((c) => [c._id, c.count])
+    );
+
+    const allNames = [
+      ...DEFAULT_CATEGORIES,
+      ...Object.keys(countMap).filter((name) => !DEFAULT_CATEGORIES.includes(name)),
+    ];
+
+    const data = allNames.map((name) => ({
+      name,
+      count: countMap[name] || 0,
+    }));
+
+    res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

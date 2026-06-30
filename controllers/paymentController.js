@@ -5,6 +5,13 @@ const Product = require('../models/Product');
 
 exports.createPaymentIntent = async (req, res) => {
   try {
+    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder')) {
+      return res.status(503).json({
+        success: false,
+        message: 'Stripe is not configured. Add STRIPE_SECRET_KEY to the server .env file.',
+      });
+    }
+
     const { amount, productId } = req.body;
 
     if (productId) {
@@ -26,13 +33,14 @@ exports.createPaymentIntent = async (req, res) => {
 
 exports.savePayment = async (req, res) => {
   try {
-    const { orderId, transactionId, amount, status } = req.body;
+    const { orderId, transactionId, amount, status, paymentMethod } = req.body;
 
     const payment = await Payment.create({
       orderId,
       transactionId,
       amount,
       paymentStatus: status,
+      paymentMethod: paymentMethod || 'card',
       buyerId: req.user._id,
     });
 
@@ -43,7 +51,12 @@ exports.savePayment = async (req, res) => {
         { new: true }
       );
       if (order) {
-        await Product.findByIdAndUpdate(order.productId, { status: 'sold' });
+        const product = await Product.findById(order.productId);
+        if (product) {
+          product.stock = Math.max(0, (product.stock ?? 1) - 1);
+          if (product.stock === 0) product.status = 'sold';
+          await product.save();
+        }
       }
     }
 

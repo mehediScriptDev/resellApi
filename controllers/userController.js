@@ -23,6 +23,24 @@ exports.updateMe = async (req, res) => {
   }
 };
 
+exports.becomeSeller = async (req, res) => {
+  try {
+    if (req.user.role === 'seller' || req.user.role === 'admin') {
+      return res.json({ success: true, data: req.user, message: 'Already a seller' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { role: 'seller' },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({ success: true, data: user, message: 'You can now post ads' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 exports.getAllUsers = async (req, res) => {
   try {
     const { search, role } = req.query;
